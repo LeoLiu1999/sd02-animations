@@ -1,108 +1,96 @@
 var c = document.getElementById("slate");
-var toggleButton = document.getElementById("toggle");
-var clearButton  = document.getElementById("clear");
-var toggleStatus = document.getElementById("toggleStatus");
-var toggle = 0;
-
 var ctx = c.getContext("2d");
 
-var checkerboard = function(){
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0,0,600,600);
-    
-    ctx.fillStyle = "#000000";
-    
-    var xcor = 0;
-    var ycor = 0;
+//all the buttons
+var toggleButton = document.getElementById("toggle");
+var clearButton  = document.getElementById("clear");
+var startButton  = document.getElementById("start");
+var stopButton  = document.getElementById("stop");
 
-    for(x = 0; x < 600; x += 20){
-	for(y = 0; y < 600; y += 20){
-	    //console.log(x);
-	    //console.log(y);
-	    if((x + y) % 40 == 0){
-		ctx.fillRect(xcor + x,ycor + y,20,20);
-	    }
-	}
-    }
+//and status display
+var toggleStatus = document.getElementById("toggleStatus");
+
+//control vars
+var started = false; //prevents multiple presses of start past the first from taking effect (stops increasing speed on further presses)
+var toggle = 0;
+var frameId;
+var xcor;
+var ycor;
+var dX = 3;
+var dY = 3;
+var size;
+
+var newCircle = function(e){
+    xcor = e.offsetX;
+    ycor = e.offsetY;
+    drawCircle(xcor, ycor, 10);
 }
 
-var drawCircle = function(x, y){
-    console.log(x);
-    console.log(y);
-
+var drawCircle = function(x, y, r){
     ctx.beginPath();
 
-    ctx.arc(x, y, 10, 0, 2*Math.PI);
+    ctx.arc(x, y, r, 0, 2*Math.PI);
     ctx.stroke();
     ctx.fill();
-}
-
-var drawSquare = function(x, y){
-    console.log(x);
-    console.log(y);
-
-    ctx.fillRect(x-10, y-10, 20, 20);    
-}
-
-
-var pathStarted = false;
-
-var drawDot = function(x, y){
-    var radius = 10;
-    ctx.moveTo(x + radius,y); //jump straight to the starting point of the arc
-    ctx.arc(x, y, radius, 0, 2*Math.PI);
-    ctx.fill();
-    ctx.stroke();
-    ctx.moveTo(x, y);
-}
-
-var drawLine = function(x, y){
-    if (pathStarted){
-	pathStarted = true;
-	ctx.beginPath();
-	ctx.moveTo(x, y);
-    } else {
-	ctx.lineTo(x, y);
-	ctx.stroke();
-    }
 }
 
 var clear = function(){
-    pathStarted = false;
-    ctx.beginPath();
-    ctx.clearRect(0, 0, 600, 600);
+    ctx.beginPath();               //reset path
+    ctx.clearRect(0, 0, 600, 600); //clear canvas
 }
 
 var draw = function(e){
     ctx.fillStyle = "#000000";
-    if (toggle == 0)
-	drawCircle(e.offsetX, e.offsetY);
-    if (toggle == 1)
-	drawSquare(e.offsetX, e.offsetY);
-    if (toggle == 2){
-	ctx.fillStyle = "#0000ff";
-	drawLine(e.offsetX, e.offsetY);
-	drawDot(e.offsetX, e.offsetY);
-	ctx.moveTo(e.offsetX, e.offsetY);
+
+    if (toggle == 0){
+	size = frameId % 120;
+	if (size > 60)
+	    size = 120 - size
+	size += 10
     }
+    
+    if (toggle == 1){
+	if (xcor <= 0)
+	    dX = Math.abs(dX);
+	if (xcor >= 600)
+	    dX = -1 * Math.abs(dX);
+	if (ycor <= 0)
+	    dY = Math.abs(dY);
+	if (ycor >= 600)
+	    dY = -1 * Math.abs(dY);
+	xcor += dX;
+	ycor += dY;
+    }
+    
+    clear();
+    drawCircle(xcor, ycor, size);
+    frameId = window.requestAnimationFrame(draw);
 }
 
 var toggleFunc = function(){
-    if(toggle == 2){
+    if (toggle < 1){
+	toggle += 1;
+	toggleStatus.innerHTML = "Bouncing";
+    } else {
 	toggle = 0;
-	toggleStatus.innerHTML = "Circles";
-    } else if(toggle == 0){
-	toggle = 1;
-	toggleStatus.innerHTML = "Squares";
-    } else if(toggle == 1){
-	toggle = 2;
-	toggleStatus.innerHTML = "Connect the dots";
-	pathStarted = false;
-	ctx.beginPath();
+	toggleStatus.innerHTML = "Growing & Shrinking";
     }
-    console.log(toggle);
 }
 
-c.addEventListener("click", draw);
-toggleButton.addEventListener("click", toggleFunc);
+var start = function(){
+    if(! started){
+	started = true;
+	frameId = window.requestAnimationFrame(draw);
+    }
+}
+
+var stop = function(){
+    started = false;
+    window.cancelAnimationFrame(frameId);
+}
+
+c.addEventListener("click", newCircle);
+startButton.addEventListener("click", start);
+stopButton.addEventListener("click", stop);
+toggleButton.addEventListener("click", toggleFunc); //Bounce around or grow & shrink
 clearButton.addEventListener("click", clear);
