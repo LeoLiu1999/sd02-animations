@@ -20,6 +20,9 @@ var dX = 3;
 var dY = 3;
 var size;
 
+var logo = new Image();
+logo.src = "https://logos-download.com/wp-content/uploads/2016/07/DVD_logo_small.png";
+
 var newCircle = function(e){
     xcor = e.offsetX;
     ycor = e.offsetY;
@@ -47,24 +50,26 @@ var draw = function(e){
 	if (size > 60)
 	    size = 120 - size
 	size += 10
+	clear();
+	drawCircle(xcor, ycor, size);
     }
     
     if (toggle == 1){
 	if (xcor <= 0)
 	    dX = Math.abs(dX);
-	if (xcor >= 600)
+	if (xcor >= 390)
 	    dX = -1 * Math.abs(dX);
 	if (ycor <= 0)
 	    dY = Math.abs(dY);
-	if (ycor >= 600)
+	if (ycor >= 390)
 	    dY = -1 * Math.abs(dY);
 	xcor += dX;
 	ycor += dY;
+	clear();
+	ctx.drawImage(logo, xcor, ycor)
     }
     
-    clear();
-    drawCircle(xcor, ycor, size);
-    frameId = window.requestAnimationFrame(draw);
+        frameId = window.requestAnimationFrame(draw);
 }
 
 var toggleFunc = function(){
