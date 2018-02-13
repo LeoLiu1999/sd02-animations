@@ -57,16 +57,16 @@ var draw = function(e){
     if (toggle == 1){
 	if (xcor <= 0)
 	    dX = Math.abs(dX);
-	if (xcor >= 390)
+	if (xcor >= 392)
 	    dX = -1 * Math.abs(dX);
 	if (ycor <= 0)
 	    dY = Math.abs(dY);
-	if (ycor >= 390)
+	if (ycor >= 494)
 	    dY = -1 * Math.abs(dY);
 	xcor += dX;
 	ycor += dY;
 	clear();
-	ctx.drawImage(logo, xcor, ycor)
+	ctx.drawImage(logo, xcor, ycor - 52)
     }
     
         frameId = window.requestAnimationFrame(draw);
